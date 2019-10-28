@@ -2,9 +2,9 @@
 
 ## Supported Tags
 * p*
-* table*
-  * td
-  * tr
+* --table*--
+  * --td--
+  * --tr--
 * style
 
 *style-able tags
@@ -35,8 +35,9 @@ Invalid tag syntax will raise a SyntaxError.
 
 ## How to Use
 ### Styling tags
-Styling tags apply to neighboring element tag(s) and their descendants
+Styling tags apply globally.
 
 ### Element tags
+Currently, tags do not support nesting.
 While element tags can technically contain anything, `table` tags will only display properly with properly nested `tr` and `td` tags.
 
