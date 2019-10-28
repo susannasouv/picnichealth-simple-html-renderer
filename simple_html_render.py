@@ -10,6 +10,22 @@ def find_opening_closing_pairs_of_tags(simple_html, opening_tag, closing_tag):
         opening_tag_index = simple_html.find(opening_tag, closing_tag_index + len(closing_tag))
     return opening_to_closing_tag_indices
 
+
+def find_opening_closing_pairs_of_nestable_tags(simple_html, opening_tag, closing_tag):
+    assert opening_tag != closing_tag
+    opening_to_closing_tag_indices = []
+    unmatched_indices = []
+    opening_tag_index = simple_html.find(opening_tag)
+    while opening_tag_index != -1:
+        closing_tag_index = simple_html.find(closing_tag, opening_tag_index + len(opening_tag))
+        next_opening_tag_index = simple_html.find(opening_tag, opening_tag_index + len(opening_tag))
+        if next_opening_tag_index != -1 and next_opening_tag_index < closing_tag_index:
+            unmatched_indices.append(opening_tag_index)
+        else:
+            opening_to_closing_tag_indices.append((opening_tag_index, closing_tag_index))
+            opening_tag_index = next_opening_tag_index
+
+
 def simple_html_renderer(simple_html):
     """
     supported tags:
@@ -27,35 +43,54 @@ def simple_html_renderer(simple_html):
     styles = {}
     open_style_tag = "<style>"
     close_style_tag = "</style>"
-    # find open and close indices of style tags
     opening_closing_pairs_of_style_tags = find_opening_closing_pairs_of_tags(simple_html, open_style_tag, close_style_tag)
-    # parse content between those indices
     for start, end in opening_closing_pairs_of_style_tags:
         styles.update(parse_style_tag_content(simple_html[start + len(open_style_tag):end]))
+    # parse all of the non-styling content and stitch together
     styleless_html = ""
-    start_index = 0
+    non_style_start_index = 0
     for style_start, style_end in opening_closing_pairs_of_style_tags:
-        end_index = style_start
-        styleless_html += simple_html[start_index:end_index]
-        start_index = style_end + len(close_style_tag)
-    styleless_html += simple_html[start_index:]
-    # these stylings will be applied to every element in the doc
-    # stitch together what is left and move on
-    # find open and close indices of supported tags
-    opening_p_tag = "<p>"
-    closing_p_tag = "</p>"
+        non_style_end_index = style_start
+        styleless_html += simple_html[non_style_start_index:non_style_end_index]
+        non_style_start_index = style_end + len(close_style_tag)
+    # append the final non-style html that comes after the final closing style tag
+    styleless_html += simple_html[non_style_start_index:]
+    return render_html_with_styles(styleless_html, styles)
 
+
+def render_html_with_styles(styleless_html, styles={}):
+    supported_styleable_elements = ("p")
+    opening_p_tag, closing_p_tag = "<p>", "</p>"
+
+    # TODO use find_opening_closing_pairs_of_nestable_tags to support nesting
     opening_closing_pairs_of_p_tags = find_opening_closing_pairs_of_tags(styleless_html, opening_p_tag, closing_p_tag)
 
     output = ""
     for start, end in opening_closing_pairs_of_p_tags:
         output += parse_p_tag_content(styleless_html[start + len(opening_p_tag):end], styles)
 
-    opening_table_tag = "<table>"
+    p_less_html = ""
+
+    non_p_start_index = 0
+    for p_start, p_end in opening_closing_pairs_of_p_tags:
+        non_p_end_index = p_start
+        p_less_html += styleless_html[non_p_start_index:non_p_end_index]
+        non_p_start_index = p_end + len(closing_p_tag)
+    p_less_html += styleless_html[non_p_start_index:]
+
+    opening_table_tag, closing_table_tag = "<table>", "</table>"
+    opening_closing_pairs_of_table_tags = find_opening_closing_pairs_of_tags(p_less_html, opening_table_tag, closing_table_tag)
+
+    for start, end in opening_closing_pairs_of_table_tags:
+        output += parse_table_tag_content(styleless_html[start + len(opening_table_tag): end], styles)
+
     return output
 
+
 def parse_table_tag_content(table_tag_content, styles={}):
+    # TODO
     return ""
+
 
 def parse_p_tag_content(p_tag_content, styles={}):
     min_height = p_tag_content.count("\n") + 1
@@ -87,6 +122,7 @@ def parse_p_tag_content(p_tag_content, styles={}):
             p_tag_content = tmp_p_tag_content
 
     return p_tag_content
+
 
 def parse_style_tag_content(style_tag_content):
     # removes all whitespace
