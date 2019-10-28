@@ -2,9 +2,9 @@
 
 ## Supported Tags
 * p*
-* table*
-  * td
-  * tr
+* --table*--
+  * --td--
+  * --tr--
 * style
 
 *style-able tags
@@ -33,7 +33,16 @@ Styling syntax follows the following format:
 
 Invalid tag syntax will raise a SyntaxError.
 
-## How to Use
+## How to Use (for now)
+```
+python -i simple_html_renderer/simple_html_render.py
+
+>>> simple_html_renderer("<p>Hello World!</p>")
+'Hello World!'
+```
+
+File reading coming soon?
+
 ### Styling tags
 Styling tags apply to neighboring element tag(s) and their descendants
 
