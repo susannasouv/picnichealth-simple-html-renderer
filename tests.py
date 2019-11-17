@@ -1,5 +1,5 @@
 import unittest
-from simple_html_renderer.simple_html_render import simple_html_renderer
+from simple_html_renderer.simple_html_render import simple_html_renderer, parse_table_tag_content
 
 
 class TestSimpleHTMLRenderer(unittest.TestCase):
@@ -25,14 +25,14 @@ class TestSimpleHTMLRenderer(unittest.TestCase):
         # self.assertEqual(simple_html_renderer("<td>Hi World!</td>"), "Hi World!")
         # self.assertEqual(simple_html_renderer("<tr>Hola World!</tr>"), "Hola World!")
 
-    # def test_valid_table_with_one_nonempty_row(self):
-    #     # valid table
-    #     # one row
-    #     # EXPECTED OUTPUT:
-    #     # ----
-    #     #| Hi |
-    #     # ----
-    #     self.assertEqual(simple_html_renderer("<table><tr><td>Hi</td></tr></table>"), " ----\n| Hi |\n ----")
+    def test_valid_table_with_one_nonempty_row(self):
+        # valid table
+        # one row
+        # EXPECTED OUTPUT:
+        # ----
+        #| Hi |
+        # ----
+        self.assertEqual(parse_table_tag_content("<table><tr><td>Hi</td></tr></table>"), " ----\n| Hi |\n ----")
 
     # def test_valid_table_with_two_nonempty_rows_longer_second_row(self):
     #     # two rows, second row is longer than first row
@@ -258,14 +258,14 @@ class TestSimpleHTMLRenderer(unittest.TestCase):
     #     # TODO: maybe this should be optional for now?
     #     self.assertEqual(simple_html_renderer("<style>p{width:6;}</style><p>Hi</p>"), simple_html_renderer("<style>\np {\n  width: 6;\n}\n</style>"))
 
-    def test_inner_style_tag_takes_priority(self):
-        # EXPECTED OUTPUT:
-        # Hi        
-        self.assertEqual(simple_html_renderer("<style>p{width:6;}</style><p><style>p{width:10;}</style>Hi</p>"), "Hi        \n")
-        # EXPECTED OUTPUT:
-        # Hello 
-        # Hi        
-        self.assertEqual(simple_html_renderer("<style>p{width:6;}</style><p>Hello<style>p{width:10;margin-top:4;}</style>Hi</p>"), "Hello \n\n\n\n\nHi      ")
+    # def test_inner_style_tag_takes_priority(self):
+    #     # EXPECTED OUTPUT:
+    #     # Hi        
+    #     self.assertEqual(simple_html_renderer("<style>p{width:6;}</style><p><style>p{width:10;}</style>Hi</p>"), "Hi        \n")
+    #     # EXPECTED OUTPUT:
+    #     # Hello 
+    #     # Hi        
+    #     self.assertEqual(simple_html_renderer("<style>p{width:6;}</style><p>Hello<style>p{width:10;margin-top:4;}</style>Hi</p>"), "Hello \n\n\n\n\nHi      ")
 
 
 
